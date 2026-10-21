@@ -9,20 +9,25 @@ II. Add a light, and use the modified Phong lighting model to color your object.
 It’s your choice about whether to compute the lighting in the vertex shader 
 or the fragment shader.
 */
-// Light directon/eye coords
-// Material
+// Light direction/eye coords
+// w = 0 makes a directional light!
+// (x,y,z) is the direction the light
+// made it upper corner AKA what shader uses as L
 var lightPosition = vec4(0.4, 0.8, 0.45, 0.0);
-var lightAmbient = vec4(0.2, 0.2, 0.2, 1.0);
-var lightDiffuse = vec4(1.0, 1.0, 1.0, 1.0);
-var lightSpecular = vec4(1.0, 1.0, 1.0, 1.0);
 
-var materialAmbient = vec4(0.1, 0.4, 0.2, 1.0);
-var materialDiffuse = vec4(0.3, 0.9, 0.3, 1.0);
-var materialSpecular = vec4(1.0, 1.0, 1.0, 1.0);
-var materialShininess = 40.0;
+// Light colors
+var lightAmbient = vec4(0.4, 0.4, 0.4, 1.0);
+var lightDiffuse = vec4(1.1, 1.1, 1.1, 1.0);
+var lightSpecular = vec4(0.8, 0.8, 0.8, 1.0);
+
+// Material
+var materialAmbient = vec4(0.05, 0.12, 0.35, 1.0);
+var materialDiffuse = vec4(0.6, 1.0, 0.25, 1.0);
+var materialSpecular = vec4(0.9, 1.0, 0.75, 1.0);
+var materialShininess = 60.0;
 
 // Camera/projection
-var eye = vec3(0.0, 0.0, 20.0);
+var eye = vec3(0.0, 0.0, 34.0);
 var at = vec3(0.0, 0.0, 0.0);
 var up = vec3(0.0, 1.0, 0.0);
 
@@ -32,6 +37,26 @@ var thetaX = 20,
 var speed = 2.0;
 var keysDown = {};
 var modelViewLoc;
+
+// Clover shape is made of 5 boxes
+// the boxes are basically chunky hearts
+// boxes are [centerX, centerY, width, height] in local coordinates
+// (0,0) is the middle of the clover
+var leaf = [
+  [-1.5, 6, 2, 1],
+  [1.5, 6, 2, 1],
+  [0, 4.5, 7, 2],
+  [0, 3, 5, 1],
+  [0, 2, 3, 1],
+];
+
+// Midddle part of the clover that connects the leaves together
+var center = [0, 0, 3, 3];
+var stem = [
+  [0, -7, 1, 3],
+  [-1.5, -8, 2, 1],
+];
+var thickness = 4.0;
 
 function quad(v, a, b, c, d) {
   var normal = normalize(
@@ -44,10 +69,12 @@ function quad(v, a, b, c, d) {
   }
 }
 
-function box(cx, cy, w, h, depth) {
+// The class example code for cube had 8 fixed vertices
+// box() builds its 8 corners from the center and size as clover components
+function box(cx, cy, w, h) {
   var hx = w / 2,
     hy = h / 2,
-    z = depth / 2;
+    z = thickness / 2;
   var v = [
     vec4(cx - hx, cy - hy, z, 1.0),
     vec4(cx - hx, cy + hy, z, 1.0),
@@ -66,12 +93,34 @@ function box(cx, cy, w, h, depth) {
   quad(v, 5, 4, 0, 1);
 }
 
-/*
-I. Vertex coordinates are not in the default range - a (non-identity) 
-Model-View matrix appropriate for viewing is required.
-*/
+// each leaf is the top one rotated 90 degrees counterclockwise
+function buildClover() {
+  for (var k = 0; k < 4; k++) {
+    for (var i = 0; i < leaf.length; i++) {
+      var x = leaf[i][0],
+        y = leaf[i][1],
+        w = leaf[i][2],
+        h = leaf[i][3];
+      for (var turn = 0; turn < k; turn++) {
+        // Rotate 90 degrees
+        var oldX = x;
+        x = -y;
+        y = oldX;
+        var oldW = w;
+        w = h;
+        h = oldW;
+      }
+      box(x, y, w, h);
+    }
+  }
+  box(center[0], center[1], center[2], center[3]);
+  for (var s = 0; s < stem.length; s++) {
+    box(stem[s][0], stem[s][1], stem[s][2], stem[s][3]);
+  }
+}
+
 function buildObject() {
-  box(0, 0, 6, 4, 3);
+  buildClover();
 }
 
 window.onload = function init() {
@@ -137,6 +186,8 @@ window.onload = function init() {
   );
   modelViewLoc = gl.getUniformLocation(program, "uModelViewMatrix");
 
+  // The class cube example used buttons, but these handlers check for when arrow keys are held down
+  // render() does the turning
   window.addEventListener("keydown", function (e) {
     if (e.key.indexOf("Arrow") !== 0) return;
     keysDown[e.key] = true;
@@ -169,6 +220,10 @@ var render = function () {
   // Down arrow: rotate clockwise about the X axis.
   if (keysDown["ArrowDown"]) thetaX -= speed;
 
+  /*
+  I. Vertex coordinates are not in the default range - a (non-identity) 
+  Model-View matrix appropriate for viewing is required.
+  */
   var viewMatrix = lookAt(eye, at, up);
   var modelMatrix = mult(
     rotate(thetaX, vec3(1, 0, 0)),

@@ -3,4 +3,7 @@ Joshua Xotoy
 William Lopez
 10/20/2026
 
-[explanation bla bla bla]
+
+This program creates a 3D four leaf clover and lights it with modified Phong. The way Blinn-Phong works is that it adds three things. There’s the ambient, a constant base glow. Then there’s diffuse, brightness. And then specular, the shiny highlight. It’s called modified because the highlight uses the halfway vector between the light and eye directions instead of a reflection vector, which is what the Shaded Cube example does too. The lighting is then computed in the vertex shader with a directional light. The clover is defined in the local coordinates and drawn through a non-identity ModelView matrix and a perspective projection. The arrow keys rotate it, left and right about the Y axis and up and down about the X axis.
+
+We began by checking out the Week 9 Shaded Cube example. We kept the shader structure, the Blinn-Phong calculation, the buffer setup, the quad() function, and then the light and material colors. We wanted to create a unique shape, so we went for a clover made of boxes. The box function was alongside a loop that would rotate a leaf to make four. Then, the orthographic projection was swapped for a perspective projection. And the rotation buttons from the example were replaced with arrow key event handlers. We also changed the light to a directional one, since we liked the look of the heart example on the homework assignment.

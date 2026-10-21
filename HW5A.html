@@ -6,7 +6,54 @@ William Lopez
 -->
 <!doctype html>
 <html>
-  <script id="vertex-shader" type="x-shader/x-vertex"></script>
+  <title>HW5A - Phong Rotation</title>
+  <script id="vertex-shader" type="x-shader/x-vertex">
+    #version 300 es
+
+    in vec4 aPosition;
+    in vec3 aNormal;
+    out vec4 vColor;
+
+    uniform vec4 uAmbientProduct, uDiffuseProduct, uSpecularProduct;
+    uniform mat4 uModelViewMatrix;
+    uniform mat4 uProjectionMatrix;
+    uniform vec4 uLightPosition;
+    uniform float uShininess;
+
+    void main()
+    {
+      // vertex in eye space
+      vec3 pos = (uModelViewMatrix * aPosition).xyz;
+
+      // to the light
+      vec3 L = normalize(uLightPosition.xyz);
+
+      // to the eye
+      vec3 E = normalize(-pos);
+
+      // halfway vector
+      vec3 H = normalize(L + E);
+      vec3 N = normalize((uModelViewMatrix * vec4(aNormal, 0.0)).xyz);
+
+      vec4 ambient = uAmbientProduct;
+
+      // L is the direction of the light, N is the surface normal
+      // max(0.0) stops faces turned away from getting negative light
+      float Kd = max(dot(L, N), 0.0);
+
+      // main color of the object
+      vec4 diffuse = Kd * uDiffuseProduct;
+
+      // highlight strength
+      float Ks = pow(max(dot(N, H), 0.0), uShininess);
+      vec4 specular = Ks * uSpecularProduct;
+      if (dot(L, N) < 0.0) specular = vec4(0.0, 0.0, 0.0, 1.0);
+
+      gl_Position = uProjectionMatrix * uModelViewMatrix * aPosition;
+      vColor = ambient + diffuse + specular;
+      vColor.a = 1.0;
+    }
+  </script>
   <script id="fragment-shader" type="x-shader/x-fragment">
     #version 300 es
     precision mediump float;

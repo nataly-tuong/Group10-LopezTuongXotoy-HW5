@@ -6,6 +6,23 @@ William Lopez
 -->
 <!doctype html>
 <html>
+  <head>
+    // In line css to make the entire page black // Not really necessary, I just
+    thought it'd look cooler
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: black;
+      }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    </style>
+  </head>
   <title>HW5A - Phong Rotation</title>
   <script id="vertex-shader" type="x-shader/x-vertex">
     #version 300 es

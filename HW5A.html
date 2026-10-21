@@ -7,7 +7,17 @@ William Lopez
 <!doctype html>
 <html>
   <script id="vertex-shader" type="x-shader/x-vertex"></script>
-  <script id="fragment-shader" type="x-shader/x-fragment"></script>
+  <script id="fragment-shader" type="x-shader/x-fragment">
+    #version 300 es
+    precision mediump float;
+
+    in vec4 vColor;
+    out vec4 fColor;
+
+    void main() {
+      fColor = vColor;
+    }
+  </script>
 
   <script type="text/javascript" src="./Common/initShaders.js"></script>
   <script type="text/javascript" src="./Common/MV.js"></script>

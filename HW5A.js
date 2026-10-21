@@ -1,3 +1,13 @@
+/*
+Nataly Tuong
+Joshua Xotoy
+William Lopez
+10-28-2026
+
+* Referenced the Week 9 Shaded Cube example! 
+Mostly referenced buffer setup, quad pattern, and light/material
+*/
+
 "use strict";
 
 var canvas, gl, program;
